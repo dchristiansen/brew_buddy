@@ -1,20 +1,24 @@
 from django.db import models
 
-class Ingredient(models.Model):
-    name = models.CharField(max_length=200)
 
 class HomebrewBatch(models.Model):
     name = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='brew_images', blank=True, null=True)
-    ingredients = models.ManyToManyField(Ingredient)
-    start_date = models.DateField()
-    rack_date = models.DateField()
-    bottle_date = models.DateField()
-    original_gravity = models.FloatField()
-    final_gravity = models.FloatField()
-    abv = models.FloatField()
-    notes = models.TextField()
+    start_date = models.DateField(blank=True)
+    rack_date = models.DateField(blank=True)
+    bottle_date = models.DateField(blank=True)
+    original_gravity = models.FloatField(blank=True)
+    final_gravity = models.FloatField(blank=True)
+    abv = models.FloatField(blank=True)
+    notes = models.TextField(blank=True)
 
+    def save(self, *args, **kwargs):
+        # Calculate the ABV if both original and final gravity are provided
+        if self.original_gravity and self.final_gravity:
+            self.abv = round((self.original_gravity - self.final_gravity) * 131.25, 2)
+        else:
+            self.abv = None
+        super(HomebrewBatch, self).save(*args, **kwargs)
+        
     class Meta:
        ordering = ('name',)
 
